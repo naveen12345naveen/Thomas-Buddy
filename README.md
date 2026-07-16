@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,21 +15,12 @@
             align-items: center;
             background: linear-gradient(135deg, #0f172a, #1e1b4b);
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: #fff;
         }
 
-        /* Main Workspace split into Chat and Dashboard */
-        .workspace {
-            display: flex;
-            gap: 30px;
-            width: 950px;
-            height: 600px;
-            max-width: 95%;
-        }
-
-        /* Glassmorphism Chat Container */
+        /* Glassmorphism Chat Container Centered */
         .chat-container {
-            flex: 1;
+            width: 450px;
+            height: 600px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -41,42 +32,39 @@
             overflow: hidden;
         }
 
-        /* Saved Reminders Dashboard Panels */
-        .dashboard-container {
-            width: 380px;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-header, .dashboard-header {
+        /* Glow Header */
+        .chat-header {
             padding: 20px;
             background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             text-align: center;
         }
 
-        .chat-header h2, .dashboard-header h2 {
+        .chat-header h2 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: #6366f1;
             text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
             letter-spacing: 1px;
         }
 
-        /* Chat Streams & List Displays */
-        .chat-logs, .reminder-list {
+        /* Chat History Stream */
+        .chat-logs {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 12px;
+        }
+
+        /* Custom Scrollbar */
+        .chat-logs::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-logs::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
         }
 
         /* Message Bubbles */
@@ -86,7 +74,7 @@
             max-width: 75%;
             font-size: 0.95rem;
             line-height: 1.4;
-            animation: fadeIn 0.2s ease-out;
+            animation: fadeIn 0.3s ease-out;
         }
 
         @keyframes fadeIn {
@@ -110,33 +98,7 @@
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
-        /* Live Database Entry Item Cards */
-        .reminder-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 14px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .reminder-info h4 { margin: 0 0 4px 0; color: #f8fafc; font-size: 0.95rem; }
-        .reminder-info span { font-size: 0.8rem; color: #94a3b8; }
-
-        .delete-btn {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #fca5a5;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.2s;
-        }
-        .delete-btn:hover { background: #ef4444; color: white; }
-
-        /* Input Controls Setup */
+        /* Input Area Wrapper */
         .chat-input-area {
             padding: 20px;
             background: rgba(0, 0, 0, 0.2);
@@ -145,6 +107,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
+        /* Dynamic Input Styles */
         .chat-input-area input {
             flex: 1;
             padding: 12px 16px;
@@ -154,10 +117,16 @@
             color: #fff;
             font-size: 0.95rem;
             outline: none;
+            transition: all 0.3s;
         }
 
-        .chat-input-area input:focus { border-color: #6366f1; }
+        .chat-input-area input:focus {
+            border-color: #6366f1;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+        }
 
+        /* Neon Action Button */
         .chat-input-area button {
             padding: 12px 24px;
             background: #4f46e5;
@@ -166,42 +135,37 @@
             color: white;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s;
         }
-        .chat-input-area button:hover { background: #6366f1; }
+
+        .chat-input-area button:hover {
+            background: #6366f1;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
+        }
     </style>
 </head>
 <body>
 
-<div class="workspace">
-    <!-- Chat Widget Layout Block -->
-    <div class="chat-container">
-        <div class="chat-header">
-            <h2>⚡ CORE REMINDER BOT</h2>
-        </div>
-        <div id="chat-logs" class="chat-logs"></div>
-        <div class="chat-input-area">
-            <input type="text" id="chat-input">
-            <button onclick="handleInput()">Send</button>
-        </div>
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>⚡ CORE REMINDER ENGINE</h2>
     </div>
-
-    <!-- Active Storage Display Panel -->
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h2>💾 BROWSER LOCAL STORAGE</h2>
-        </div>
-        <div id="reminder-list" class="reminder-list"></div>
+    <div id="chat-logs" class="chat-logs"></div>
+    <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Type here...">
+        <button onclick="handleInput()">Send</button>
     </div>
 </div>
 
 <script>
+    // Conversational state tracking
     let currentStep = 0; 
     let reminderData = { task: "", date: "", time: "" };
 
     const steps = [
-        { key: "task", prompt: "What event or task do you want me to save?", type: "text", placeholder: "e.g., Doctor appointment" },
-        { key: "date", prompt: "Got it. What is the target date?", type: "date", placeholder: "" },
-        { key: "time", prompt: "At what time?", type: "time", placeholder: "" }
+        { key: "task", prompt: "Hello! What event or task should I remind you about?", type: "text" },
+        { key: "date", prompt: "Got it. On what date? (YYYY-MM-DD)", type: "date" },
+        { key: "time", prompt: "At what time? (HH:MM)", type: "time" }
     ];
 
     function appendMessage(text, isUser) {
@@ -215,16 +179,15 @@
 
     function initBot() {
         appendMessage(steps[0].prompt, false);
-        const inputElement = document.getElementById('chat-input');
-        inputElement.type = steps[0].type;
-        inputElement.placeholder = steps[0].placeholder;
+        document.getElementById('chat-input').type = steps[0].type;
     }
 
-    function handleInput() {
+    async function handleInput() {
         const inputElement = document.getElementById('chat-input');
         const value = inputElement.value.trim();
         if (!value) return;
 
+        // Display user selection
         appendMessage(value, true);
         reminderData[steps[currentStep].key] = value;
         inputElement.value = "";
@@ -232,73 +195,47 @@
         currentStep++;
 
         if (currentStep < steps.length) {
+            // Ask next targeted question
             setTimeout(() => {
                 appendMessage(steps[currentStep].prompt, false);
                 inputElement.type = steps[currentStep].type;
-                inputElement.placeholder = steps[currentStep].placeholder;
                 inputElement.focus();
-            }, 500);
+            }, 600);
         } else {
-            setTimeout(processAndStoreReminder, 500);
+            // Process the collected payload data to your C++ backend
+            setTimeout(submitReminder, 600);
         }
     }
 
-    function processAndStoreReminder() {
-        let localDb = JSON.parse(localStorage.getItem('my_reminders')) || [];
-        
-        // Add new reminder payload
-        localDb.push({
-            id: Date.now(), 
-            task: reminderData.task,
-            date: reminderData.date, // Formatted as YYYY-MM-DD
-            time: reminderData.time, // Formatted as HH:MM
-            triggered: false         // Flag to prevent double alerting
-        });
+    async function submitReminder() {
+        appendMessage("Processing payload configuration...", false);
 
-        localStorage.setItem('my_reminders', JSON.stringify(localDb));
-        appendMessage(`🎉 Success! Saved to your vault. I will alert you at that exact time.`, false);
-        
-        renderDashboardList();
+        try {
+            const response = await fetch('http://localhost:8080/reminder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reminderData)
+            });
+            const data = await response.json();
+            appendMessage(data.reply, false);
+        } catch (err) {
+            appendMessage("⚠️ Failure writing string to local API nod.", false);
+        }
 
-        // Reset flow
+        // Reset conversation flow loop
         currentStep = 0;
         reminderData = { task: "", date: "", time: "" };
-        setTimeout(initBot, 2500);
+        setTimeout(initBot, 2000);
     }
 
-    function renderDashboardList() {
-        const container = document.getElementById('reminder-list');
-        container.innerHTML = "";
-        
-        let localDb = JSON.parse(localStorage.getItem('my_reminders')) || [];
+    // Capture Enter Keypress
+    document.getElementById('chat-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') handleInput();
+    });
 
-        if(localDb.length === 0) {
-            container.innerHTML = `<div style="text-align:center; color:#64748b; margin-top:20px; font-size:0.9rem;">No active reminders saved.</div>`;
-            return;
-        }
+    // Start UI
+    initBot();
+</script>
 
-        localDb.forEach(item => {
-            const card = document.createElement('div');
-            card.className = "reminder-card";
-            if (item.triggered) card.style.opacity = "0.5"; // Fade out completed items
-            
-            card.innerHTML = `
-                <div class="reminder-info">
-                    <h4>${item.task} ${item.triggered ? '✅' : ''}</h4>
-                    <span>📅 ${item.date} @ ${item.time}</span>
-                </div>
-                <button class="delete-btn" onclick="deleteReminder(${item.id})">Clear</button>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function deleteReminder(id) {
-        let localDb = JSON.parse(localStorage.getItem('my_reminders')) || [];
-        localDb = localDb.filter(item => item.id !== id);
-        localStorage.setItem('my_reminders', JSON.stringify(localDb));
-        renderDashboardList();
-    }
-
-    // --- AUTOMATIC TIME CHECKING ENGINE ---
-    function checkRemindersOnTime() {
+</body>
+</html>
