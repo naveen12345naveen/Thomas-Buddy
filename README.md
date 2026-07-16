@@ -244,26 +244,23 @@
     }
 
     function processAndStoreReminder() {
-        // Retrieve existing database array or create fresh blank structure
         let localDb = JSON.parse(localStorage.getItem('my_reminders')) || [];
         
         // Add new reminder payload
         localDb.push({
-            id: Date.now(), // Unique identity ID marker
+            id: Date.now(), 
             task: reminderData.task,
-            date: reminderData.date,
-            time: reminderData.time
+            date: reminderData.date, // Formatted as YYYY-MM-DD
+            time: reminderData.time, // Formatted as HH:MM
+            triggered: false         // Flag to prevent double alerting
         });
 
-        // Commit modifications back directly into browser's native database
         localStorage.setItem('my_reminders', JSON.stringify(localDb));
-
-        appendMessage(`🎉 Success! Saved directly to your local file vault.`, false);
+        appendMessage(`🎉 Success! Saved to your vault. I will alert you at that exact time.`, false);
         
-        // Re-render dashboard display component view list
         renderDashboardList();
 
-        // Restart interaction loop chain
+        // Reset flow
         currentStep = 0;
         reminderData = { task: "", date: "", time: "" };
         setTimeout(initBot, 2500);
@@ -283,9 +280,11 @@
         localDb.forEach(item => {
             const card = document.createElement('div');
             card.className = "reminder-card";
+            if (item.triggered) card.style.opacity = "0.5"; // Fade out completed items
+            
             card.innerHTML = `
                 <div class="reminder-info">
-                    <h4>${item.task}</h4>
+                    <h4>${item.task} ${item.triggered ? '✅' : ''}</h4>
                     <span>📅 ${item.date} @ ${item.time}</span>
                 </div>
                 <button class="delete-btn" onclick="deleteReminder(${item.id})">Clear</button>
@@ -296,10 +295,10 @@
 
     function deleteReminder(id) {
         let localDb = JSON.parse(localStorage.getItem('my_reminders')) || [];
-        // Filter out selected ID index entry points
         localDb = localDb.filter(item => item.id !== id);
         localStorage.setItem('my_reminders', JSON.stringify(localDb));
         renderDashboardList();
     }
 
-    document.getElementById('chat-input').addEventListener('keypress', function (e) {
+    // --- AUTOMATIC TIME CHECKING ENGINE ---
+    function checkRemindersOnTime() {
