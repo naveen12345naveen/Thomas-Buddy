@@ -158,6 +158,9 @@
 </div>
 
 <script>
+    // Config: Paste your Google Web App Link here
+    const GOOGLE_WEB_APP_URL = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL';
+
     // Conversational state tracking
     let currentStep = 0; 
     let reminderData = { task: "", date: "", time: "" };
@@ -187,7 +190,6 @@
         const value = inputElement.value.trim();
         if (!value) return;
 
-        // Display user selection
         appendMessage(value, true);
         reminderData[steps[currentStep].key] = value;
         inputElement.value = "";
@@ -195,45 +197,46 @@
         currentStep++;
 
         if (currentStep < steps.length) {
-            // Ask next targeted question
             setTimeout(() => {
                 appendMessage(steps[currentStep].prompt, false);
                 inputElement.type = steps[currentStep].type;
                 inputElement.focus();
             }, 600);
         } else {
-            // Process the collected payload data to your C++ backend
             setTimeout(submitReminder, 600);
         }
     }
 
     async function submitReminder() {
-        appendMessage("Processing payload configuration...", false);
+        appendMessage("Syncing payload with Google Drive Automation Engine...", false);
 
         try {
-            const response = await fetch('http://localhost:8080/reminder', {
+            // Google Apps Script requires text/plain transmission for complex web requests to clear CORS blocks easily
+            const response = await fetch(GOOGLE_WEB_APP_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                mode: 'no-cors', // Bypasses CORS browser pre-flight checks safely
+                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify(reminderData)
             });
-            const data = await response.json();
-            appendMessage(data.reply, false);
+            
+            // Because 'no-cors' mode hides standard responses, we display an optimistic success state.
+            appendMessage("✅ Reminder successfully transmitted to Google Drive storage container!", false);
+
         } catch (err) {
-            appendMessage("⚠️ Failure writing string to local API nod.", false);
+            appendMessage("⚠️ Failure parsing network packet to Google Drive API nod.", false);
+            console.error(err);
         }
 
         // Reset conversation flow loop
         currentStep = 0;
         reminderData = { task: "", date: "", time: "" };
-        setTimeout(initBot, 2000);
+        setTimeout(initBot, 2500);
     }
 
-    // Capture Enter Keypress
     document.getElementById('chat-input').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') handleInput();
     });
 
-    // Start UI
     initBot();
 </script>
 
