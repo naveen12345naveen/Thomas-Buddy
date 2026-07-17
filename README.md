@@ -1,244 +1,201 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Reminder Bot</title>
-    <style>
-        /* Futuristic Gradient Background */
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #0f172a, #1e1b4b);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
+# Thomas Buddy - AI Agent
 
-        /* Glassmorphism Chat Container Centered */
-        .chat-container {
-            width: 450px;
-            height: 600px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+A production-ready, customizable AI agent built with Python and OpenAI's GPT models. Create intelligent agents with tool integration, multi-turn conversations, and extensible architecture.
 
-        /* Glow Header */
-        .chat-header {
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            text-align: center;
-        }
+## Features
 
-        .chat-header h2 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: #6366f1;
-            text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-            letter-spacing: 1px;
-        }
+✨ **Core Capabilities**
+- Multi-turn conversation with full history management
+- Tool/function calling support for extending agent capabilities
+- Session management with unique session IDs
+- Configurable system prompts and behavior
+- Error handling and logging
 
-        /* Chat History Stream */
-        .chat-logs {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+🛠️ **Built-in Tools**
+- Web search
+- Mathematical calculations
+- Time/date information
+- Weather lookup
+- Text analysis
+- Code snippet generation
 
-        /* Custom Scrollbar */
-        .chat-logs::-webkit-scrollbar {
-            width: 6px;
-        }
-        .chat-logs::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
+🔧 **Developer Friendly**
+- Easy-to-use Python API
+- Extensible tool registry for custom tools
+- Comprehensive configuration system
+- Unit tests included
+- Docker support
 
-        /* Message Bubbles */
-        .msg {
-            padding: 12px 16px;
-            border-radius: 16px;
-            max-width: 75%;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            animation: fadeIn 0.3s ease-out;
-        }
+📊 **Production Ready**
+- Structured logging
+- Error tracking
+- Performance monitoring
+- Environment-based configuration
+- Interactive CLI interface
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+## Quick Start
 
-        .msg.bot {
-            background: rgba(255, 255, 255, 0.08);
-            color: #e2e8f0;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+### Prerequisites
 
-        .msg.user {
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: #ffffff;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
+- Python 3.8+
+- OpenAI API key
 
-        /* Input Area Wrapper */
-        .chat-input-area {
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.2);
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
+### Installation
 
-        /* Dynamic Input Styles */
-        .chat-input-area input {
-            flex: 1;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s;
-        }
+1. Clone the repository:
+```bash
+git clone https://github.com/naveen12345naveen/Thomas-Buddy.git
+cd Thomas-Buddy
+```
 
-        .chat-input-area input:focus {
-            border-color: #6366f1;
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
-        }
+2. Install dependencies:
+```bash
+make install
+```
 
-        /* Neon Action Button */
-        .chat-input-area button {
-            padding: 12px 24px;
-            background: #4f46e5;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+3. Setup environment:
+```bash
+make setup
+```
 
-        .chat-input-area button:hover {
-            background: #6366f1;
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
-        }
-    </style>
-</head>
-<body>
+4. Add your OpenAI API key to `.env`:
+```bash
+OPENAI_API_KEY=your_api_key_here
+```
 
-<div class="chat-container">
-    <div class="chat-header">
-        <h2>⚡ CORE REMINDER ENGINE</h2>
-    </div>
-    <div id="chat-logs" class="chat-logs"></div>
-    <div class="chat-input-area">
-        <input type="text" id="chat-input" placeholder="Type here...">
-        <button onclick="handleInput()">Send</button>
-    </div>
-</div>
+### Running the Agent
 
-<script>
-    // Config: Paste your Google Web App Link here
-    const GOOGLE_WEB_APP_URL = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL';
+**Interactive mode:**
+```bash
+make run
+```
 
-    // Conversational state tracking
-    let currentStep = 0; 
-    let reminderData = { task: "", date: "", time: "" };
+**As a library:**
+```python
+from src.agent import AIAgent
+from src.config import Config
 
-    const steps = [
-        { key: "task", prompt: "Hello! What event or task should I remind you about?", type: "text" },
-        { key: "date", prompt: "Got it. On what date? (YYYY-MM-DD)", type: "date" },
-        { key: "time", prompt: "At what time? (HH:MM)", type: "time" }
-    ];
+# Create agent
+agent = AIAgent(name="Thomas", config=Config())
 
-    function appendMessage(text, isUser) {
-        const logs = document.getElementById('chat-logs');
-        const msg = document.createElement('div');
-        msg.className = `msg ${isUser ? 'user' : 'bot'}`;
-        msg.innerText = text;
-        logs.appendChild(msg);
-        logs.scrollTop = logs.scrollHeight;
-    }
+# Chat with the agent
+response = agent.chat("What is Python?")
+print(response.content)
+```
 
-    function initBot() {
-        appendMessage(steps[0].prompt, false);
-        document.getElementById('chat-input').type = steps[0].type;
-    }
+## Usage Examples
 
-    async function handleInput() {
-        const inputElement = document.getElementById('chat-input');
-        const value = inputElement.value.trim();
-        if (!value) return;
+### Basic Chat
 
-        appendMessage(value, true);
-        reminderData[steps[currentStep].key] = value;
-        inputElement.value = "";
+```python
+from src.agent import AIAgent
 
-        currentStep++;
+agent = AIAgent(name="Thomas")
+response = agent.chat("Hello! How can you help me?")
+print(response.content)
+```
 
-        if (currentStep < steps.length) {
-            setTimeout(() => {
-                appendMessage(steps[currentStep].prompt, false);
-                inputElement.type = steps[currentStep].type;
-                inputElement.focus();
-            }, 600);
-        } else {
-            setTimeout(submitReminder, 600);
-        }
-    }
+### Using Tools
 
-    async function submitReminder() {
-        appendMessage("Syncing payload with Google Drive Automation Engine...", false);
+```python
+agent = AIAgent(name="Thomas")
 
-        try {
-            // Google Apps Script requires text/plain transmission for complex web requests to clear CORS blocks easily
-            const response = await fetch(GOOGLE_WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Bypasses CORS browser pre-flight checks safely
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(reminderData)
-            });
-            
-            // Because 'no-cors' mode hides standard responses, we display an optimistic success state.
-            appendMessage("✅ Reminder successfully transmitted to Google Drive storage container!", false);
+# Agent can use built-in tools automatically
+response = agent.chat("What is 25 * 4?", use_tools=True)
+print(response.content)
 
-        } catch (err) {
-            appendMessage("⚠️ Failure parsing network packet to Google Drive API nod.", false);
-            console.error(err);
-        }
+# Access tool calls made
+for tool_call in response.tool_calls:
+    print(f"Tool: {tool_call.tool_name}, Args: {tool_call.arguments}")
+```
 
-        // Reset conversation flow loop
-        currentStep = 0;
-        reminderData = { task: "", date: "", time: "" };
-        setTimeout(initBot, 2500);
-    }
+### Custom Tools
 
-    document.getElementById('chat-input').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') handleInput();
-    });
+```python
+from src.agent import AIAgent
+from src.tools import tool_registry
 
-    initBot();
-</script>
+def get_user_data(user_id: int) -> str:
+    return f"User {user_id} data: ..."
 
-</body>
-</html>
+# Register custom tool
+tool_registry.register(
+    "get_user_data",
+    "Fetch user data by ID",
+    get_user_data,
+    {"user_id": {"type": "integer", "description": "User ID"}}
+)
+
+# Use it
+agent = AIAgent(name="Thomas")
+response = agent.chat("Get data for user 123", use_tools=True)
+```
+
+## Project Structure
+
+```
+Thomas-Buddy/
+├── src/
+│   ├── agent.py          # Core agent implementation
+│   ├── config.py         # Configuration management
+│   ├── models.py         # Data models (Pydantic)
+│   ├── tools.py          # Tool registry and built-in tools
+│   └── __init__.py
+├── tests/
+│   ├── test_agent.py     # Agent unit tests
+│   └── __init__.py
+├── examples/
+│   ├── basic_chat.py     # Basic usage example
+│   ├── custom_tools.py   # Custom tools example
+│   └── advanced_usage.py # Advanced examples
+├── main.py               # Entry point
+├── requirements.txt      # Dependencies
+├── .env.example          # Environment template
+├── Dockerfile            # Docker image
+├── docker-compose.yml    # Docker compose
+├── Makefile             # Build commands
+├── .gitignore           # Git ignore rules
+└── README.md            # This file
+```
+
+## Docker
+
+Build and run with Docker:
+
+```bash
+# Build image
+make docker-build
+
+# Run container
+make docker-run
+```
+
+## Testing
+
+Run all tests:
+```bash
+make test
+```
+
+## Configuration
+
+Configuration via `.env`:
+
+```env
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-4
+AGENT_NAME=Thomas
+AGENT_TEMPERATURE=0.7
+AGENT_MAX_TOKENS=2000
+LOG_LEVEL=INFO
+DEBUG=False
+```
+
+## License
+
+MIT License
+
+## Support
+
+- 📧 GitHub Issues: https://github.com/naveen12345naveen/Thomas-Buddy/issues
+- 💬 Discussions: https://github.com/naveen12345naveen/Thomas-Buddy/discussions

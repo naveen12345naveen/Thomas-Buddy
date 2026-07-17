@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  thomas-buddy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thomas-buddy-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4
+      - AGENT_NAME=Thomas
+      - AGENT_TEMPERATURE=0.7
+      - LOG_LEVEL=INFO
+      - DEBUG=False
+    volumes:
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
