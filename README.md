@@ -1,89 +1,107 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <thread>
-#include <chrono>
-#include <mutex>
-#include <sstream>
 
-// Structure to store reminder details
-struct Reminder {
-    std::string message;
-    std::chrono::steady_clock::time_point triggerTime;
-};
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Reminder Chatbot</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; hieght: 100vh; height: 100vh; }
+        .chat-container { width: 400px; height: 600px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { background: #0078d4; color: white; padding: 15px; text-align: center; font-weight: bold; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 75%; padding: 10px 14px; border-radius: 15px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .bot { background: #e1dfdd; align-self: flex-start; border-bottom-left-radius: 2px; color: #323130; }
+        .user { background: #0078d4; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-input-area { display: flex; padding: 10px; background: #faf9f8; border-top: 1px solid #edebe9; }
+        #input-box { flex: 1; padding: 10px; border: 1px solid #ccd1d9; border-radius: 20px; outline: none; padding-left: 15px; }
+        #send-btn { background: #0078d4; color: white; border: none; padding: 0 15px; margin-left: 8px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        #send-btn:hover { background: #106ebe; }
+    </style>
+</head>
+<body>
 
-// Global variables for thread safety
-std::vector<Reminder> reminders;
-std::mutex reminderMutex;
-bool running = true;
+<div class="chat-container">
+    <div class="chat-header">Reminder Bot</div>
+    <div class="chat-messages" id="chat-messages">
+        <div class="message bot">Hello! Tell me what to remember and when.<br><br>Format:<br><b>[message] in [X] seconds</b><br><i>Example: Drink water in 10 seconds</i></div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="input-box" placeholder="Type a reminder command..." autocomplete="off">
+        <button id="send-btn">Send</button>
+    </div>
+</div>
 
-// Background worker thread to monitor and trigger reminders
-void reminderWorker() {
-    while (running) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        auto now = std::chrono::steady_clock::now();
-        
-        std::lock_guard<std::mutex> lock(reminderMutex);
-        for (auto it = reminders.begin(); it != reminders.end(); ) {
-            if (now >= it->triggerTime) {
-                std::cout << "\n\a[REMINDER]: " << it->message << "\n> " << std::flush;
-                it = reminders.erase(it); // Remove triggered reminder
-            } else {
-                ++it;
-            }
-        }
+<script>
+    const chatMessages = document.getElementById('chat-messages');
+    const inputBox = document.getElementById('input-box');
+    const sendBtn = document.getElementById('send-btn');
+
+    // Load existing reminders from localStorage or initialize empty array
+    let reminders = JSON.parse(localStorage.getItem('html_reminders')) || [];
+
+    // Helper to add chat bubbles
+    function addMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', sender);
+        msgDiv.innerHTML = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto scroll to bottom
     }
-}
 
-int main() {
-    // Start background thread
-    std::thread worker(reminderWorker);
-    
-    std::cout << "=== C++ Reminder Chatbot ===\n";
-    std::cout << "Format: <seconds> <message>\n";
-    std::cout << "Example: 10 Take out the trash\n";
-    std::cout << "Type 'exit' to quit.\n\n";
+    // Process user commands
+    function processCommand() {
+        const text = inputBox.value.trim();
+        if (!text) return;
 
-    std::string line;
-    while (true) {
-        std::cout << "> ";
-        if (!std::getline(std::cin, line) || line == "exit") {
-            break;
-        }
+        addMessage(text, 'user');
+        inputBox.value = '';
 
-        std::stringstream ss(line);
-        int seconds;
-        std::string message;
+        // Regex pattern to extract message and seconds (e.g., "Call mom in 30 seconds")
+        const pattern = /(.+)\s+in\s+(\d+)\s+seconds?/i;
+        const match = text.match(pattern);
 
-        // Parse seconds and the remaining text string
-        if (ss >> seconds) {
-            std::getline(ss >> std::ws, message); // Read rest of line ignoring leading whitespace
-            
-            if (message.empty()) {
-                std::cout << "Bot: Please provide a message for the reminder.\n";
-                continue;
-            }
+        if (match) {
+            const reminderText = match[1];
+            const seconds = parseInt(match[2], 10);
+            const triggerTime = Date.now() + (seconds * 1000);
 
-            // Calculate exact trigger time point
-            auto trigger = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
+            // Save reminder configuration
+            const newReminder = { message: reminderText, triggerTime: triggerTime };
+            reminders.push(newReminder);
+            localStorage.setItem('html_reminders', JSON.stringify(reminders));
 
-            // Thread-safe insertion
-            {
-                std::lock_guard<std::mutex> lock(reminderMutex);
-                reminders.push_back({message, trigger});
-            }
-
-            std::cout << "Bot: Saved! I will remind you about '" << message << "' in " << seconds << " seconds.\n";
+            addMessage(`Got it! I will remind you to "${reminderText}" in ${seconds} seconds.`, 'bot');
         } else {
-            std::cout << "Bot: Invalid format. Use: <seconds> <message>\n";
+            addMessage(`Sorry, I didn't catch that. Please use the format:<br><b>[message] in [seconds] seconds</b>`, 'bot');
         }
     }
 
-    // Clean shutdown
-    running = false;
-    if (worker.joinable()) {
-        worker.join();
-    }
-    return 0;
-}
+    // Background checker simulating thread loops (runs every second)
+    setInterval(() => {
+        const now = Date.now();
+        let changed = false;
 
+        reminders = reminders.filter(reminder => {
+            if (now >= reminder.triggerTime) {
+                addMessage(`⏰ <b>REMINDER:</b> ${reminder.message}`, 'bot');
+                // Play native browser notification sound if supported
+                try { new Audio('https://mixkit.co').play(); } catch(e){}
+                changed = true;
+                return false; // Remove from active list
+            }
+            return true; // Keep in list
+        });
+
+        if (changed) {
+            localStorage.setItem('html_reminders', JSON.stringify(reminders));
+        }
+    }, 1000);
+
+    // Event listeners for sending messages
+    sendBtn.addEventListener('click', processCommand);
+    inputBox.addEventListener('keypress', (e) => { if (e.key === 'Enter') processCommand(); });
+</script>
+
+</body>
+</html>
